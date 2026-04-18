@@ -12,7 +12,7 @@ func create_oomi(id: String, first_name: String, last_name: String, birthdate: S
 		"last_name": last_name,
 		"birthdate": birthdate,
 		"needs": {
-			"hunger": 100.0, # 0 to 100
+			"hunger": 80.0, # 0 to 100 — starts at 80 so feeding is observable from the start
 			"happiness": 50.0 # 0 to 100
 		},
 		"personality": {
@@ -58,10 +58,15 @@ func get_oomi(id: String) -> Dictionary:
 	return {}
 
 # give an item to a character's inventory
-func give_item(id: String, item_id: String):
-	if oomis.has(id):
-		if not oomis[id]["inventory"].has(item_id):
-			oomis[id]["inventory"].append(item_id)
+# returns true if the item was added, false if the oomi doesn't exist or already has it
+func give_item(id: String, item_id: String) -> bool:
+	if not oomis.has(id):
+		push_error("CharacterManager: give_item called with unknown id: " + id)
+		return false
+	if oomis[id]["inventory"].has(item_id):
+		return false
+	oomis[id]["inventory"].append(item_id)
+	return true
 			
 # feed an oomi
 func feed_oomi(id: String, food_id: String):
@@ -71,5 +76,4 @@ func feed_oomi(id: String, food_id: String):
 	if oomis.has(id):
 		var nutrition = food.get("nutrition", 0)
 		oomis[id]["needs"]["hunger"] += nutrition
-		if oomis[id]["needs"]["hunger"] > 100.0:
-			oomis[id]["needs"]["hunger"] = 100.0
+		oomis[id]["needs"]["hunger"] = clamp(oomis[id]["needs"]["hunger"], 0.0, 100.0)

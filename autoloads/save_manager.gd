@@ -66,8 +66,8 @@ func load_game() -> bool:
 		push_error("SaveManager: Save data structure is invalid.")
 		return false
 
-	# Handle future save version migrations here
-	var version = save_data.get("version", 0)
+	# Cast to int — JSON loads all numbers as floats, which breaks integer comparison
+	var version = int(save_data.get("version", 0))
 	if version < SAVE_VERSION:
 		print("SaveManager: Old save version ", version, " detected — migrating.")
 		# Add migration logic here as the game evolves
